@@ -57,20 +57,27 @@ def get_user_input_for_value(message: str, return_type: Generic[T]) -> T:
 
 def prompt_user_to_add_cmake_var() -> bool:
     """Prompt a user to determine weather or not to add cmake_vars to the build config and return a boolean."""
-    add_cmake_var: str = get_user_input_for_value("Do you have any Cmake vars to add? (y/n)", str).lower()
+    add_cmake_var: str = get_user_input_for_value("Do you have any Cmake vars to add? (y/n): ", str).lower()
     while add_cmake_var not in ["y", "n"]:
         print("Invalid choice. Use (y) for yes. (n) for No.")
-        add_cmake_var = get_user_input_for_value("Do you have any Cmake vars to add? (y/n)", str).lower()
+        add_cmake_var = get_user_input_for_value("Do you have any Cmake vars to add? (y/n): ", str).lower()
 
     # Return boolean value that represents weather the user wants to add a variable to the configuration
     return add_cmake_var == "y"
 
 
 def get_cmake_vars_from_user() -> List[CmakeVariable]:
-    """WIP. Get all cmake vars from a given user for a provided build configuration"""
+    """Get all cmake vars from a given user for a provided build configuration."""
     cmake_variables: List[CmakeVariable] = []
     while prompt_user_to_add_cmake_var():
-        cmake_variables.append(CmakeVariable("t", "t", CmakeVarType.BOOL))
+        try:
+            cmake_variables.append(CmakeVariable(
+                get_user_input_for_value("Cmake variable name: ", str),
+                get_user_input_for_value("Cmake variable value: ", str),
+                get_user_input_for_value("Cmake variable type: ", CmakeVarType)
+            ))
+        except ValueError as e:
+            print(f"Invalid CmakeVarType: {e}. Ignoring variable. Enter variable info again.")
 
     return cmake_variables
 
@@ -85,7 +92,7 @@ installRoot: str = r"${projectDir}\\out\\install\\${name}"
 cmakeCommandArgs: str = get_user_input_for_value("Cmake Command Args: ", str)
 buildCommandArgs: str = get_user_input_for_value("Build Command Args: ", str)
 ctestCommandArgs: str = get_user_input_for_value("Ctest Command Args: ", str)
-variables: List[CmakeVariable] = []  # ToDo: Parse these in using helper methods
+variables: List[CmakeVariable] = get_cmake_vars_from_user()
 
 #ToDo: Wrap this in a loop driven by user input
 build_config: BuildConfig = BuildConfig(name=name,
