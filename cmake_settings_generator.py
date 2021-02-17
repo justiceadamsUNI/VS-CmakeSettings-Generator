@@ -72,9 +72,9 @@ def get_cmake_vars_from_user() -> List[CmakeVariable]:
     while prompt_user_to_add_cmake_var():
         try:
             cmake_variables.append(CmakeVariable(
-                get_user_input_for_value("Cmake variable name: ", str),
-                get_user_input_for_value("Cmake variable value: ", str),
-                get_user_input_for_value("Cmake variable type: ", CmakeVarType)
+                get_user_input_for_value("Cmake Variable Name: ", str),
+                get_user_input_for_value("Cmake Variable Value: ", str),
+                get_user_input_for_value("Cmake Variable Type: ", CmakeVarType)
             ))
         except ValueError as e:
             print(f"Invalid CmakeVarType: {e}. Ignoring variable. Enter variable info again.")
@@ -82,32 +82,40 @@ def get_cmake_vars_from_user() -> List[CmakeVariable]:
     return cmake_variables
 
 
-project_dir: str = get_user_input_for_value("Cmake Project Directory: ", str)
-name: str = get_user_input_for_value("Name: ", str)
-generator: str = get_user_input_for_value("Generator: ", str)
-configurationType: str = get_user_input_for_value("Configuration Type: ", str)
-inheritEnvironments: str = get_user_input_for_value("Inherit Environments: ", str)
-buildRoot: str = r"${projectDir}\\out\\build\\${name}"
-installRoot: str = r"${projectDir}\\out\\install\\${name}"
-cmakeCommandArgs: str = get_user_input_for_value("Cmake Command Args: ", str)
-buildCommandArgs: str = get_user_input_for_value("Build Command Args: ", str)
-ctestCommandArgs: str = get_user_input_for_value("Ctest Command Args: ", str)
-variables: List[CmakeVariable] = get_cmake_vars_from_user()
+def build_config_from_user_input() -> BuildConfig:
+    """Helper method to prompt the user and build data container object from input."""
+    project_dir: str = get_user_input_for_value("Cmake Project Directory: ", str)
+    name: str = get_user_input_for_value("Project Config Name: ", str)
+    generator: str = get_user_input_for_value("Generator: ", str)
+    configurationType: str = get_user_input_for_value("Configuration Type: ", str)
+    inheritEnvironments: str = get_user_input_for_value("Inherit Environments: ", str)
+    buildRoot: str = r"${projectDir}\\out\\build\\${name}"
+    installRoot: str = r"${projectDir}\\out\\install\\${name}"
+    cmakeCommandArgs: str = get_user_input_for_value("Cmake Command Args: ", str)
+    buildCommandArgs: str = get_user_input_for_value("Build Command Args: ", str)
+    ctestCommandArgs: str = get_user_input_for_value("Ctest Command Args: ", str)
+    variables: List[CmakeVariable] = get_cmake_vars_from_user()
 
-#ToDo: Wrap this in a loop driven by user input
-build_config: BuildConfig = BuildConfig(name=name,
-                                        generator=generator,
-                                        configurationType=configurationType,
-                                        inheritEnvironments=inheritEnvironments,
-                                        buildRoot=buildRoot,
-                                        installRoot=installRoot,
-                                        cmakeCommandArgs=cmakeCommandArgs,
-                                        buildCommandArgs=buildCommandArgs,
-                                        ctestCommandArgs=ctestCommandArgs,
-                                        variables=variables)
+    # Build object and return it to function user
+    return BuildConfig(name=name,
+                       generator=generator,
+                       configurationType=configurationType,
+                       inheritEnvironments=inheritEnvironments,
+                       buildRoot=buildRoot,
+                       installRoot=installRoot,
+                       cmakeCommandArgs=cmakeCommandArgs,
+                       buildCommandArgs=buildCommandArgs,
+                       ctestCommandArgs=ctestCommandArgs,
+                       variables=variables)
 
+
+
+# Main -------------------------
+v = build_config_from_user_input()
+print()
+print(f"Generated Build Config ({v.name}):")
+print(json.dumps(asdict(v), indent=2))
 
 #ToDo: Parse data classes to JSON and write to the project_dir
-print(json.dumps(asdict(build_config)))
 
 #ToDo: Notify the user that they can acheive the same resulst with a constructed Cmake command (in terms of build systems)
